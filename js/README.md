@@ -40,7 +40,7 @@ let arr = [];
 console.log(arr.constructor == Array);
 console.log(arr.constructor == RegExp);
 console.log(arr.constructor == Object);
-Numbet.prototype.constructor = "AA";
+Numbet.prototype.constructor = 'AA';
 let n = 1;
 console.log(n.constructor == Number);
 ```
@@ -61,26 +61,26 @@ console.log(n.constructor == Number);
   const toString = class2type.toString; //Object.prototype.toString
   // 设定数据类型的映射表
   [
-    "Boolean",
-    "Number",
-    "String",
-    "Function",
-    "Array",
-    "Date",
-    "RegExp",
-    "Object",
-    "Error",
-    "Symbol",
+    'Boolean',
+    'Number',
+    'String',
+    'Function',
+    'Array',
+    'Date',
+    'RegExp',
+    'Object',
+    'Error',
+    'Symbol',
   ].forEach((name) => {
     class2type[`[object ${name}]`] = name.toLowerCase();
   });
 
   function toType(obj) {
     if (obj == null) {
-      return obj + "";
+      return obj + '';
     }
-    return typeof obj === "object" || typeof obj === "function"
-      ? class2type[toString.call(obj)] || "object"
+    return typeof obj === 'object' || typeof obj === 'function'
+      ? class2type[toString.call(obj)] || 'object'
       : typeof obj;
   }
   window.toType = toType;
@@ -102,18 +102,18 @@ console.log(n.constructor == Number);
 ```js
 let arr = new Arrar(9999999).fill(0);
 
-console.time("FOR~~");
+console.time('FOR~~');
 for (let i = 0; i < arr.length; i++) {}
-console.timeEnd("FOR~~");
+console.timeEnd('FOR~~');
 
-console.time("WHILE~~");
+console.time('WHILE~~');
 
 let i = 0;
 
 while (i < arr.length) {
   i++;
 }
-console.timeEnd("WHILE~~");
+console.timeEnd('WHILE~~');
 
 arr.forEach((item) => {});
 ```
@@ -129,7 +129,7 @@ Array.prototype.forEach = function (callback, context) {
     len = _this.length;
   context = context == null ? window : context;
   for (; i < len; i++) {
-    typeof callback === "function" ? callback.call(context, _this[i], i) : null;
+    typeof callback === 'function' ? callback.call(context, _this[i], i) : null;
   }
 };
 ```
@@ -143,9 +143,9 @@ Array.prototype.forEach = function (callback, context) {
 
 ```js
 let obj = {
-  name: "zs",
+  name: 'zs',
   age: 18,
-  [symbol("A")]: "AA",
+  [symbol('A')]: 'AA',
   0: 100,
   1: 200,
 };
@@ -159,12 +159,12 @@ for (let key in obj) {
 // 获取对象中的私有属性 非 symbol 外
 let keys = Object.keys(obj);
 // 如果浏览器支持 Symbol 则 加上对象中的symbol 属性
-if (typeof Symbol !== "undefined")
+if (typeof Symbol !== 'undefined')
   keys = keys.concat(Object.getOwnPropertySymbols(obj));
 
 keys.forEach((key) => {
-  console.log("属性名", key);
-  console.log("属性值", obj[key]);
+  console.log('属性名', key);
+  console.log('属性值', obj[key]);
 });
 ```
 
@@ -197,11 +197,11 @@ arr[Symbol.iterator] = function () {
     },
   };
 };
-console.time("FOR OF~~");
+console.time('FOR OF~~');
 for (const val of arr) {
   console.log(val);
 }
-console.timeEnd("FOR OF~~");
+console.timeEnd('FOR OF~~');
 
 let obj = {
   0: 100,
@@ -234,7 +234,7 @@ function func(x, y) {
 }
 
 const obj = {
-  name: "obj",
+  name: 'obj',
 };
 
 /** 重写 call 方法
@@ -244,7 +244,7 @@ const obj = {
 
 Function.prototype.call = function (context, ...params) {
   let _this = this,
-    key = Symbol["KEY"],
+    key = Symbol['KEY'],
     ret;
   context === null ? (context = window) : null;
   !/^(object|function)$/i.test(typeof context)
@@ -283,7 +283,7 @@ Function.prototype.bind = function (context, ...params) {
  * 1. 把 传递进来的 obj 10 20 等信息存储起来
  * 2. 执行bind返回一个新的函数 例如 proxy 把 proxy 绑定给 DOM 元素的事件 在 proxy 内部执行 func 函数 并把this 和值 都改变成 存储的内容
  * */
-document.body.addEventListener("click", func.bind(obj, 10, 20));
+document.body.addEventListener('click', func.bind(obj, 10, 20));
 ```
 
 ### 3.2 应用场景 鸭子类型
@@ -296,4 +296,76 @@ function func() {
 }
 
 func(10, 20, 30);
+```
+
+## 4. 防抖 节流
+
+### 4.1 防抖
+
+- 原理: 如果在时间间隔内重复执行函数 重新计算时间 只保留最后一次操作 wait 毫秒之内没有重复执行当前函数 当前函数执行
+
+```js
+/**
+ * 防抖函数
+ * @param { function } func 回调函数
+ * @param { Number } wait 时间间隔
+ * @return { Function } function
+ * */
+
+function debounce(func, wait = 500) {
+  let timer = null;
+  return function (...args) {
+    let _this = this;
+    // 如果定时器 已经存在 则清除定时器
+    if (timer) clearTimeout(timer);
+
+    timer = setTimeout(() => {
+      typeof func === 'function' && func.call(_this, ...args);
+    }, wait);
+  };
+}
+```
+
+### 4.2 节流
+
+- 原理: 在一定时间内 当前函数只触发一次
+
+```js
+/**
+ * 节流函数
+ * 原理: 在一定时间内 只能触发一次
+ *
+ * @param { function } func 回调函数
+ * @param { Number } wait 时间间隔
+ * @param { Boolean } immediate 是否立即执行
+ * @return { Function } function
+ * */
+
+function throttle(func, wait = 500, immediate = true) {
+  let timer = null;
+  let flag = false;
+  return function (...args) {
+    let _this = this;
+    if (immediate) {
+      // 立即执行
+      if (!flag) {
+        flag = true;
+        // 如果是立即执行，则在wait毫秒内开始时执行
+        typeof func === 'function' && func.call(_this, ...args);
+        timer = setTimeout(() => {
+          flag = false;
+          clearTimeout(timer);
+        }, wait);
+      }
+    } else if (!flag) {
+      flag = true;
+      timer = setTimeout(() => {
+        // 如果是立即执行，则在wait毫秒内开始时执行
+        typeof func === 'function' && func.call(_this, ...args);
+        flag = false;
+        clearTimeout(timer);
+      }, wait);
+    }
+  };
+}
 ```
